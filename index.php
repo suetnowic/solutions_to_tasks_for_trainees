@@ -20,17 +20,17 @@ $this->addExternalCss("/css/common.css");
                     array("CONFIRM" => GetMessage('CT_BNL_ELEMENT_DELETE_CONFIRM'))
             );
         ?>
-        <a class="article-item article-list__item" href="<?php echo $arItem["DETAIL_PAGE_URL"] ?>" data-anim="anim-3">
+        <a class="article-item article-list__item" href="<? echo $arItem["DETAIL_PAGE_URL"] ?>" data-anim="anim-3">
             <div class="article-item__background">
                 <img src="<?= $arItem["PREVIEW_PICTURE"]["SRC"] ?>" data-src="<?= $arItem["PREVIEW_PICTURE"]["ALT"] ?>" alt=""/>
             </div>
             <div class="article-item__wrapper">
-                <div class="article-item__title"><?php echo $arItem["NAME"] ?></div>
-                <?php if ($arParams["DISPLAY_PREVIEW_TEXT"] != "N" && $arItem["PREVIEW_TEXT"]): ?>
-                <div class="article-item__content"><?php echo $arItem["PREVIEW_TEXT"]; ?></div
-                <?php endif; ?>
+                <div class="article-item__title"><? echo $arItem["NAME"] ?></div>
+                <? if ($arParams["DISPLAY_PREVIEW_TEXT"] != "N" && $arItem["PREVIEW_TEXT"]): ?>
+                <div class="article-item__content"><? echo $arItem["PREVIEW_TEXT"]; ?></div
+                <? endif; ?>
             </div>
         </a>
-        <?php endforeach; ?>
+        <? endforeach; ?>
     </div>
 </div>
