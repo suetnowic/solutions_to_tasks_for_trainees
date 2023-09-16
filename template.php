@@ -10,6 +10,7 @@ $this->addExternalCss("/css/common.css");
     </div>
 
     <form class="contact-form__form" action="<?= POST_FORM_ACTION_URI ?>" method="POST">
+        <input type="hidden" name="WEB_FORM_ID" value="<?=$arParams["WEB_FORM_ID"]?>"/>
         <?= bitrix_sessid_post() ?>
         <div class="contact-form__form-inputs">
             <? foreach ($arResult["QUESTIONS"] as $FIELD_SID => $arQuestion): ?>
