@@ -10,11 +10,12 @@ $this->addExternalCss("/css/common.css");
     </div>
 
     <form class="contact-form__form" action="<?= POST_FORM_ACTION_URI ?>" method="POST">
-        <input type="hidden" name="WEB_FORM_ID" value="<?=$arParams["WEB_FORM_ID"]?>"/>
+        <input type="hidden" name="WEB_FORM_ID" value="<?= $arParams["WEB_FORM_ID"] ?>"/>
         <?= bitrix_sessid_post() ?>
         <div class="contact-form__form-inputs">
+
             <? foreach ($arResult["QUESTIONS"] as $FIELD_SID => $arQuestion): ?>
-                <? if ($arQuestion["STRUCTURE"][0]["FIELD_TYPE"] !== "textarea"): ?>
+                <? if ($arQuestion["STRUCTURE"][0]["FIELD_TYPE"] == "text" || $arQuestion["STRUCTURE"][0]["FIELD_TYPE"] == "email"): ?>
                     <div class="input contact-form__input">
                         <label class="input__label" for="<?= $FIELD_SID ?>">
                             <div class="input__label-text"><?= $arQuestion["CAPTION"] ?><? if ($arQuestion["REQUIRED"] == "Y"): ?><?= $arResult["REQUIRED_SIGN"]; ?><? endif; ?></div>
@@ -32,32 +33,32 @@ $this->addExternalCss("/css/common.css");
                             <div class="input__notification"><?= (is_array($arResult["FORM_ERRORS"]) && array_key_exists($FIELD_SID, $arResult["FORM_ERRORS"])) ? $arResult["FORM_ERRORS"][$FIELD_SID] : "" ?></div>
                         </label>
                     </div>
-                <? endif ?>
-            <? endforeach ?>
-
-            <div class="contact-form__form-message">
-                <div class="input">
-                    <label class="input__label" for="<?= $FIELD_SID ?>">
-                        <div class="input__label-text"><?= $arQuestion["CAPTION"] ?></div>
-                        <textarea class="input__input" type="text" id="<?= $FIELD_SID ?>" name="<?= $FIELD_SID ?>"
-                                  value=""></textarea>
-                        <div class="input__notification"></div>
-                    </label>
-                </div>
-                <div class="contact-form__bottom">
-                    <div class="contact-form__bottom-policy">Нажимая &laquo;Отправить&raquo;, Вы подтверждаете, что
-                        ознакомлены,
-                        полностью согласны и принимаете условия &laquo;Согласия на обработку персональных данных&raquo;.
+                <? endif; ?>
+            <? endforeach; ?>
+        </div>
+        <? foreach ($arResult["QUESTIONS"] as $FIELD_SID => $arQuestion): ?>
+            <? if ($arQuestion["STRUCTURE"][0]["FIELD_TYPE"] == "textarea"): ?>
+                <div class="contact-form__form-message">
+                    <div class="input">
+                        <label class="input__label" for="<?= $FIELD_SID ?>">
+                            <div class="input__label-text"><?= $arQuestion["CAPTION"] ?></div>
+                            <textarea class="input__input" type="text" id="<?= $FIELD_SID ?>" name="<?= $FIELD_SID ?>"
+                                      value=""></textarea>
+                            <div class="input__notification"></div>
+                        </label>
                     </div>
+                </div>
+            <? elseif ($arQuestion["STRUCTURE"][0]["FIELD_TYPE"] == "hidden"): ?>
+                <div class="contact-form__bottom">
+                    <div class="contact-form__bottom-policy"><?= $arQuestion["CAPTION"] ?></div>
                     <button class="form-button contact-form__bottom-button" data-success="Отправлено"
                             data-error="Ошибка отправки">
                         <div class="form-button__title"><?= htmlspecialcharsbx(trim($arResult["arForm"]["BUTTON"]) == '' ? GetMessage("FORM_ADD") : $arResult["arForm"]["BUTTON"]); ?></div>
                     </button>
                 </div>
-            </div>
-        </div>
+            <? endif; ?>
+        <? endforeach; ?>
     </form>
-    <?= $arResult["REQUIRED_SIGN"]; ?> - <?= GetMessage("FORM_REQUIRED_FIELDS") ?>
 </div>
 
 <?= $arResult["FORM_FOOTER"] ?>
