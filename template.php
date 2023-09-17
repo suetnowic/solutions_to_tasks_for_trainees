@@ -3,6 +3,8 @@ $this->setFrameMode(true);
 $this->addExternalCss("/css/common.css");
 ?>
 
+<? $allowedFormInputsFieldTypes = ["text", "email"]; ?>
+
 <div class="contact-form">
     <div class="contact-form__head">
         <div class="contact-form__head-title"><?= $arResult["FORM_TITLE"] ?></div>
@@ -15,7 +17,7 @@ $this->addExternalCss("/css/common.css");
         <div class="contact-form__form-inputs">
 
             <? foreach ($arResult["QUESTIONS"] as $FIELD_SID => $arQuestion): ?>
-                <? if ($arQuestion["STRUCTURE"][0]["FIELD_TYPE"] == "text" || $arQuestion["STRUCTURE"][0]["FIELD_TYPE"] == "email"): ?>
+                <? if (in_array($arQuestion["STRUCTURE"][0]["FIELD_TYPE"], $allowedFormInputsFieldTypes)): ?>
                     <div class="input contact-form__input">
                         <label class="input__label" for="<?= $FIELD_SID ?>">
                             <div class="input__label-text"><?= $arQuestion["CAPTION"] ?><? if ($arQuestion["REQUIRED"] == "Y"): ?><?= $arResult["REQUIRED_SIGN"]; ?><? endif; ?></div>
