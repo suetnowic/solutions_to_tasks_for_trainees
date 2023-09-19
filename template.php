@@ -24,6 +24,7 @@ if ($arResult["isFormErrors"] == "Y"):?><?=$arResult["FORM_ERRORS_TEXT"];?><?php
 
 
         <form class="contact-form__form" name="<?=$arResult["WEB_FORM_NAME"]?>" action="<?=POST_FORM_ACTION_URI?>" method="POST" enctype="multipart/form-data">
+			 <input type="hidden" name="web_form_submit" value="Y">
             <div class="contact-form__form-inputs">
                 <?
                 foreach ($arResult["QUESTIONS"] as $FIELD_SID => $arQuestion) {?>
@@ -31,8 +32,7 @@ if ($arResult["isFormErrors"] == "Y"):?><?=$arResult["FORM_ERRORS_TEXT"];?><?php
                         <div class="input contact-form__input">
                             <label class="input__label" for="<?= $FIELD_SID ?>">
                                 <div class="input__label-text"><?=$arQuestion["CAPTION"]?><?if ($arQuestion["REQUIRED"] == "Y"):?><?=$arResult["REQUIRED_SIGN"];?><?endif;?></div>
-
-                                <div class="input__input" id="<?= $FIELD_SID ?>" name="<?= $FIELD_SID ?>"><?=$arQuestion["HTML_CODE"]?></div>
+								<input class="input__input" id="<?= $FIELD_SID ?>" name="<?= $FIELD_SID ?>">
 
                                 <?if (is_array($arResult["FORM_ERRORS"]) && array_key_exists($FIELD_SID, $arResult['FORM_ERRORS'])):?>
                                     <div class="input__notification" title="<?=htmlspecialcharsbx($arResult["FORM_ERRORS"][$FIELD_SID])?>"></div>
@@ -53,7 +53,7 @@ if ($arResult["isFormErrors"] == "Y"):?><?=$arResult["FORM_ERRORS_TEXT"];?><?php
                         <div class="input">
                             <label class="input__label" for="<?= $FIELD_SID ?>">
                                 <div class="input__label-text"><?=$arQuestion["CAPTION"]?><?if ($arQuestion["REQUIRED"] == "Y"):?><?=$arResult["REQUIRED_SIGN"];?><?endif;?></div>
-                                <div class="input__input" type="text" id="<?= $FIELD_SID ?>" name="<?= $FIELD_SID ?>"><?=$arQuestion["HTML_CODE"]?></div>
+                                <textarea class="input__input" type="text" id="<?= $FIELD_SID ?>" name="<?= $FIELD_SID ?>"></textarea>
                                 <div class="input__notification"></div>
                             </label>
                         </div>
@@ -69,10 +69,9 @@ if ($arResult["isFormErrors"] == "Y"):?><?=$arResult["FORM_ERRORS_TEXT"];?><?php
                         data-error="Ошибка отправки">
                     <input <?=(intval($arResult["F_RIGHT"]) < 10 ? "disabled=\"disabled\"" : "");?> type="submit" name="web_form_submit" class="form-button__title" value="<?=htmlspecialcharsbx(trim($arResult["arForm"]["BUTTON"]) == '' ? GetMessage("FORM_ADD") : $arResult["arForm"]["BUTTON"]);?>" />
                 </button>
-
             </div>
-    </div>
     </form>
+</div>
 
     <?=$arResult["FORM_FOOTER"]?>
     <?
