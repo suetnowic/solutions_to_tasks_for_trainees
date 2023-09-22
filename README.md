@@ -1,1 +1,1 @@
-# solution to task_2 for trainees
+# solution to task_3 for trainees
