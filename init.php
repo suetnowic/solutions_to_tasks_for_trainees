@@ -1,24 +1,14 @@
 <?php
 
-session_start();
+use Bitrix\Main\EventManager;
+use Only\Site\Handlers\Iblock as IblockHandler;
+use Only\Site\Agents\Iblock as IblockAgent;
 
-if (isset($_GET['noinit']) && !empty($_GET['noinit']))
-{
-    $strNoInit = strval($_GET['noinit']);
-    if ($strNoInit == 'N')
-    {
-        if (isset($_SESSION['NO_INIT']))
-            unset($_SESSION['NO_INIT']);
-    }
-    elseif ($strNoInit == 'Y')
-    {
-        $_SESSION['NO_INIT'] = 'Y';
-    }
-}
-if (!(isset($_SESSION['NO_INIT']) && $_SESSION['NO_INIT'] == 'Y'))
-{
-    if (file_exists($_SERVER["DOCUMENT_ROOT"]."/local/php_interface/events.php"))
-        require_once($_SERVER["DOCUMENT_ROOT"]."/local/php_interface/events.php");
-}
+$eventManager = EventManager::getInstance();
 
+// регистрация обработчика событий
+$eventManager->addEventHandler('iblock', 'OnAfterIBlockElementAdd', [IblockHandler::class, 'addLog']);
+$eventManager->addEventHandler('iblock', 'OnAfterIBlockElementUpdate', [IblockHandler::class, 'addLog']);
 
+// регистрация агента
+CAgent::AddAgent(IblockAgent::class . '::clearOldLogs()', 'log', 'N', 3600);
