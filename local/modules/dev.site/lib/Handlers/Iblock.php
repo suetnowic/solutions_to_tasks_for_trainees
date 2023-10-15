@@ -21,7 +21,7 @@ class Iblock
             $sectionId = 0;
             $rsSections = CIBlockSection::GetList(
                 [],
-                ['IBLOCK_ID'=>$targetIblockId, 'IBLOCK_NAME'=>$iblockName, 'IBLOCK_CODE'=>$iblockCode],
+                ['IBLOCK_ID'=>$targetIblockId, 'NAME'=>$iblockName, 'CODE'=>$iblockCode],
                 false,
                 ['ID'],
                 false
@@ -50,7 +50,7 @@ class Iblock
                 'IBLOCK_SECTION_ID'=>$sectionId,
                 'NAME'=>$arFields['ID'],
                 'ACTIVE_FROM'=>date('d.m.Y'),
-                'PREVIEW_TEXT'=>$iblockName . ' -> ' . implode(' -> ', $path) . ' -> ' . $elementName,
+                'PREVIEW_TEXT'=>$iblockName . ' -> ' . implode(' -> ', array_reverse($path)) . ' -> ' . $elementName,
             ];
             $addResult = $iblockElement->Add($elementFields);
             if (!$addResult) {
@@ -59,7 +59,7 @@ class Iblock
         }
     }
 
-    public static function getSection($sectionId, &$path)
+    public function getSection($sectionId, &$path)
     {
         $res = CIBlockSection::GetByID($sectionId);
         if ($section = $res->Fetch()) {
