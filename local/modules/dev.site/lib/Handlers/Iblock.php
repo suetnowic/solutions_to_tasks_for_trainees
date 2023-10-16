@@ -10,26 +10,26 @@ class Iblock
         $targetIblockCode = "LOG";
         $iblockId = $arFields['IBLOCK_ID'];
         $elementName = $arFields['NAME'];
-        $iblockInfo = CIBlock::GetByID($iblockId)->Fetch();
+        $iblockInfo = \CIBlock::GetByID($iblockId)->Fetch();
         $iblockCode = $iblockInfo['CODE'];// код инфоблока измененного/добавленного элемента
         $iblockName = $iblockInfo['NAME']; // имя инфоблока измененного/добавленного элемента
         // Проверяем, что добавленный/измененный элемент не принадлежит инфоблоку с кодом "LOG"
         if ($iblockCode !== $targetIblockCode) {
-            $targetIblockId = CIBlock::GetList([], ['CODE' => $targetIblockCode])->Fetch()['ID']; // получаем id инфоблока с кодом LOG
+            $targetIblockId = \CIBlock::GetList([], ['CODE' => $targetIblockCode])->Fetch()['ID']; // получаем id инфоблока с кодом LOG
             // Получаем id раздела для добавляемого/изменяемого элемента (Раздел должен быть с кодом и именем инфоблока)
 
             $sectionId = 0;
-            $rsSections = CIBlockSection::GetList(
+            $rsSections = \CIBlockSection::GetList(
                 [],
                 ['IBLOCK_ID'=>$targetIblockId, 'NAME'=>$iblockName, 'CODE'=>$iblockCode],
                 false,
                 ['ID'],
                 false
             );
+            $iblockSection = new CIBlockSection;
             $sectionExist = $rsSections->Fetch();
             if (!$sectionExist) {
                 // создаем раздел, если не найден
-                $iblockSection = new CIBlockSection;
                 $sectionFields = [
                     'ACTIVE'=>"Y",
                     'IBLOCK_ID'=>$targetIblockId,
@@ -43,25 +43,40 @@ class Iblock
 
             $path = [];
             self::getSection($arFields['IBLOCK_SECTION'][0], $path);
-            // добавляем элемент в инфоблок LOG
+            $element = \CIBlockElement::GetList([], ['NAME'=>$arFields['ID'], 'IBLOCK_ID'=>$targetIblockId]);
             $iblockElement = new CIBlockElement;
-            $elementFields = [
-                'IBLOCK_ID'=>$targetIblockId,
-                'IBLOCK_SECTION_ID'=>$sectionId,
-                'NAME'=>$arFields['ID'],
-                'ACTIVE_FROM'=>date('d.m.Y'),
-                'PREVIEW_TEXT'=>$iblockName . ' -> ' . implode(' -> ', array_reverse($path)) . ' -> ' . $elementName,
-            ];
-            $addResult = $iblockElement->Add($elementFields);
-            if (!$addResult) {
-                echo "Error: ".$iblockElement->LAST_ERROR;
+            $elementData = $element->Fetch();
+            // если элемент в LOG существует, то изменяем, иначе добавляем
+            if ($elementData) {
+                $elementFields = [
+                    'IBLOCK_SECTION_ID'=>$sectionId,
+                    'NAME'=>$arFields['ID'],
+                    'ACTIVE_FROM'=>date('d.m.Y'),
+                    'PREVIEW_TEXT'=>$iblockName . ' -> ' . implode(' -> ', array_reverse($path)) . ' -> ' . $elementName,
+                ];
+                $updateResult = $iblockElement->Update($elementData['ID'], $elementFields);
+                if (!$updateResult) {
+                    echo "Error: ".$iblockElement->LAST_ERROR;
+                }
+            } else {
+                $elementFields = [
+                    'IBLOCK_ID'=>$targetIblockId,
+                    'IBLOCK_SECTION_ID'=>$sectionId,
+                    'NAME'=>$arFields['ID'],
+                    'ACTIVE_FROM'=>date('d.m.Y'),
+                    'PREVIEW_TEXT'=>$iblockName . ' -> ' . implode(' -> ', array_reverse($path)) . ' -> ' . $elementName,
+                ];
+                $addResult = $iblockElement->Add($elementFields);
+                if (!$addResult) {
+                    echo "Error: ".$iblockElement->LAST_ERROR;
+                }
             }
         }
     }
 
     public function getSection($sectionId, &$path)
     {
-        $res = CIBlockSection::GetByID($sectionId);
+        $res = \CIBlockSection::GetByID($sectionId);
         if ($section = $res->Fetch()) {
             $path[] = $section['NAME'];
             if ($section['IBLOCK_SECTION_ID'] > 0) {
