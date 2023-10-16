@@ -9,8 +9,8 @@ class Iblock
     {
         if (\Bitrix\Main\Loader::includeModule('iblock')) {
             $logIBlockCode = "LOG";
-            $iblockId = CIBlock::GetList([], ['CODE'=>$logIBlockCode])->Fetch()['ID'];
-            $logElements = CIBlockElement::GetList(['ACTIVE_FROM'=>'DESC'], ['IBLOCK_ID'=>$iblockId], false, false, ['ID', 'ACTIVE_FROM']);
+            $iblockId = CIBlock::GetList([], ['CODE' => $logIBlockCode])->Fetch()['ID'];
+            $logElements = CIBlockElement::GetList(['ACTIVE_FROM' => 'DESC'], ['IBLOCK_ID' => $iblockId], false, false, ['ID', 'ACTIVE_FROM']);
             $i = 1;
             while ($element = $logElements->Fetch()) {
                 if ($i > 10) {

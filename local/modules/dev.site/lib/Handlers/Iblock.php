@@ -21,7 +21,7 @@ class Iblock
             $sectionId = 0;
             $rsSections = \CIBlockSection::GetList(
                 [],
-                ['IBLOCK_ID'=>$targetIblockId, 'NAME'=>$iblockName, 'CODE'=>$iblockCode],
+                ['IBLOCK_ID' => $targetIblockId, 'NAME' => $iblockName, 'CODE' => $iblockCode],
                 false,
                 ['ID'],
                 false
@@ -31,10 +31,10 @@ class Iblock
             if (!$sectionExist) {
                 // создаем раздел, если не найден
                 $sectionFields = [
-                    'ACTIVE'=>"Y",
-                    'IBLOCK_ID'=>$targetIblockId,
-                    'CODE'=>$iblockCode,
-                    'NAME'=>$iblockName,
+                    'ACTIVE' => "Y",
+                    'IBLOCK_ID' => $targetIblockId,
+                    'CODE' => $iblockCode,
+                    'NAME' => $iblockName,
                 ];
                 $sectionId = $iblockSection->Add($sectionFields);
             } else {
@@ -43,32 +43,32 @@ class Iblock
 
             $path = [];
             self::getSection($arFields['IBLOCK_SECTION'][0], $path);
-            $element = \CIBlockElement::GetList([], ['NAME'=>$arFields['ID'], 'IBLOCK_ID'=>$targetIblockId]);
+            $element = \CIBlockElement::GetList([], ['NAME' => $arFields['ID'], 'IBLOCK_ID' => $targetIblockId]);
             $iblockElement = new CIBlockElement;
             $elementData = $element->Fetch();
             // если элемент в LOG существует, то изменяем, иначе добавляем
             if ($elementData) {
                 $elementFields = [
-                    'IBLOCK_SECTION_ID'=>$sectionId,
-                    'NAME'=>$arFields['ID'],
-                    'ACTIVE_FROM'=>date('d.m.Y'),
-                    'PREVIEW_TEXT'=>$iblockName . ' -> ' . implode(' -> ', array_reverse($path)) . ' -> ' . $elementName,
+                    'IBLOCK_SECTION_ID' => $sectionId,
+                    'NAME' => $arFields['ID'],
+                    'ACTIVE_FROM' => date('d.m.Y'),
+                    'PREVIEW_TEXT' => $iblockName . ' -> ' . implode(' -> ', array_reverse($path)) . ' -> ' . $elementName,
                 ];
                 $updateResult = $iblockElement->Update($elementData['ID'], $elementFields);
                 if (!$updateResult) {
-                    echo "Error: ".$iblockElement->LAST_ERROR;
+                    echo "Error: " . $iblockElement->LAST_ERROR;
                 }
             } else {
                 $elementFields = [
-                    'IBLOCK_ID'=>$targetIblockId,
-                    'IBLOCK_SECTION_ID'=>$sectionId,
-                    'NAME'=>$arFields['ID'],
-                    'ACTIVE_FROM'=>date('d.m.Y'),
-                    'PREVIEW_TEXT'=>$iblockName . ' -> ' . implode(' -> ', array_reverse($path)) . ' -> ' . $elementName,
+                    'IBLOCK_ID' => $targetIblockId,
+                    'IBLOCK_SECTION_ID' => $sectionId,
+                    'NAME' => $arFields['ID'],
+                    'ACTIVE_FROM' => date('d.m.Y'),
+                    'PREVIEW_TEXT' => $iblockName . ' -> ' . implode(' -> ', array_reverse($path)) . ' -> ' . $elementName,
                 ];
                 $addResult = $iblockElement->Add($elementFields);
                 if (!$addResult) {
-                    echo "Error: ".$iblockElement->LAST_ERROR;
+                    echo "Error: " . $iblockElement->LAST_ERROR;
                 }
             }
         }
