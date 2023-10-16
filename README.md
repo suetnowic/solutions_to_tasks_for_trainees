@@ -1,1 +1,1 @@
-# solutions_to_tasks_for_trainees
+# solution to task_6 for trainees
