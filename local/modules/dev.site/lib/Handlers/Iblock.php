@@ -2,6 +2,9 @@
 
 namespace Only\Site\Handlers;
 
+use \Bitrix\Iblock\CIBlock;
+use \Bitrix\Iblock\CIBlockSection;
+use \Bitrix\Iblock\CIBlockElement;
 
 class Iblock
 {
@@ -26,7 +29,7 @@ class Iblock
                 ['ID'],
                 false
             );
-            $iblockSection = new CIBlockSection;
+            $iblockSection = new \CIBlockSection;
             $sectionExist = $rsSections->Fetch();
             if (!$sectionExist) {
                 // создаем раздел, если не найден
@@ -44,7 +47,7 @@ class Iblock
             $path = [];
             self::getSection($arFields['IBLOCK_SECTION'][0], $path);
             $element = \CIBlockElement::GetList([], ['NAME' => $arFields['ID'], 'IBLOCK_ID' => $targetIblockId]);
-            $iblockElement = new CIBlockElement;
+            $iblockElement = new \CIBlockElement;
             $elementData = $element->Fetch();
             // если элемент в LOG существует, то изменяем, иначе добавляем
             if ($elementData) {

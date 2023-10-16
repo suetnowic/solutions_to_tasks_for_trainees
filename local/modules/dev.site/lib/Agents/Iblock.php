@@ -2,19 +2,22 @@
 
 namespace Only\Site\Agents;
 
+use Bitrix\Main\Loader;
+use Bitrix\Iblock\CIBlock;
+use Bitrix\Iblock\CIBlockElement;
 
 class Iblock
 {
     public static function clearOldLogs()
     {
-        if (\Bitrix\Main\Loader::includeModule('iblock')) {
+        if (Loader::includeModule('iblock')) {
             $logIBlockCode = "LOG";
-            $iblockId = CIBlock::GetList([], ['CODE' => $logIBlockCode])->Fetch()['ID'];
-            $logElements = CIBlockElement::GetList(['ACTIVE_FROM' => 'DESC'], ['IBLOCK_ID' => $iblockId], false, false, ['ID', 'ACTIVE_FROM']);
+            $iblockId = \CIBlock::GetList([], ['CODE' => $logIBlockCode])->Fetch()['ID'];
+            $logElements = \CIBlockElement::GetList(['ACTIVE_FROM' => 'DESC'], ['IBLOCK_ID' => $iblockId], false, false, ['ID', 'ACTIVE_FROM']);
             $i = 1;
             while ($element = $logElements->Fetch()) {
                 if ($i > 10) {
-                    CIBlockElement::Delete($element['ID']);
+                    \CIBlockElement::Delete($element['ID']);
                 }
                 $i++;
             }
