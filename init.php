@@ -1,14 +1,17 @@
 <?php
+if (file_exists($_SERVER['DOCUMENT_ROOT'] . '/local/modules/dev.site/include.php')) {
+    require_once $_SERVER['DOCUMENT_ROOT'] . '/local/modules/dev.site/include.php';
+}
+
+use Only\Site\Agents\Iblock as Agent;
+use Only\Site\Handlers\Iblock as Handler;
+
 
 $eventManager = \Bitrix\Main\EventManager::getInstance();
 
 // регистрация обработчика событий
-$eventManager->addEventHandler('iblock', 'OnAfterIBlockElementAdd', ['\\Only\\Site\\Handlers\\Iblock', "addLog"]);
-$eventManager->addEventHandler("iblock", "OnAfterIBlockElementUpdate", ['\\Only\\Site\\Handlers\\Iblock', "addLog"]);
+$eventManager->registerEventHandler('iblock', 'OnAfterIBlockElementAdd', [Handler::class, "addLog"]);
+$eventManager->registerEventHandler('iblock', "OnAfterIBlockElementUpdate", [Handler::class, "addLog"]);
 
 // регистрация агента
-CAgent::AddAgent(Only\Site\Agents\Iblock::class . '::clearOldLogs()', 'log', 'N', 3600, "");
-
-\Bitrix\Main\Loader::registerAutoLoadClasses(null, array(
-    '\\Only\\Site\\Handlers\\Iblock' => '/local/modules/dev.site/lib/Handlers/Iblock.php',
-));
+CAgent::AddAgent(Agent::class . '::clearOldLogs()', 'log', 'N', 3600, "");
