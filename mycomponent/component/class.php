@@ -46,12 +46,21 @@ class NewsList extends CBitrixComponent
         if (empty($arParams['IBLOCK_TYPE'])) {
             ShowError("Не указан тип инфоблока");
         }
+
+        $arrFilter = [];
+        if (!empty($arParams['FILTER_NAME']) && preg_match("/^[A-Za-z_][A-Za-z01-9_]*$/", $arParams['FILTER_NAME'])) {
+            $arrFilter = $GLOBALS[$arParams['FILTER_NAME']] ?? [];
+            if (!is_array($arrFilter)) {
+                $arrFilter = [];
+            }
+        }
+
         // если указан id получаем элементы только этого инфоблока
         if (!empty($arParams['IBLOCK_ID'])) {
-            $arResult['ITEMS'] = $this->getElements($arParams['IBLOCK_ID']);
+            $arResult['ITEMS'] = $this->getElements($arParams['IBLOCK_ID'], $arrFilter);
         } else {
             // иначе получаем все элементы по типу инфоблока
-            $arResult['ITEMS'] = $this->getElementsByIBlockType($arParams['IBLOCK_TYPE']);
+            $arResult['ITEMS'] = $this->getElementsByIBlockType($arParams['IBLOCK_TYPE'], $arrFilter);
 
             //группируем по id инфоблоков
             $groupedItems = [];
@@ -69,12 +78,13 @@ class NewsList extends CBitrixComponent
 
     }
 
-    private function getElementsByIBlockType($iblockType): array
+    private function getElementsByIBlockType($iblockType, $arrFilter): array
     {
         $iblocks = CIBlock::GetList([], ['TYPE' => $iblockType]);
         $arResult = [];
         while ($iblock = $iblocks->Fetch()) {
-            $elements = CIBlockElement::GetList([], ['IBLOCK_ID' => $iblock['ID']]);
+            $arFilter = ['IBLOCK_ID' => $iblock['ID']];
+            $elements = CIBlockElement::GetList([], array_merge($arFilter, $arrFilter));
             while ($element = $elements->Fetch()) {
                 $arResult[] = $element;
             }
@@ -82,9 +92,10 @@ class NewsList extends CBitrixComponent
         return $arResult;
     }
 
-    private function getElements($iblockId): array
+    private function getElements($iblockId, $arrFilter): array
     {
-        $elements = CIBlockElement::GetList([], ['IBLOCK_ID' => $iblockId]);
+        $arFilter = ['IBLOCK_ID' => $iblockId];
+        $elements = CIBlockElement::GetList([], array_merge($arFilter, $arrFilter));
         $arResult = [];
         while ($element = $elements->Fetch()) {
             $arResult[] = $element;
