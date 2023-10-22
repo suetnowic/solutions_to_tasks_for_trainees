@@ -44,7 +44,7 @@ class NewsList extends CBitrixComponent
         $arParams = $this->arParams;
 
         if (empty($arParams['IBLOCK_TYPE'])) {
-            ShowError("Не указан тип инфоблока");
+            ShowError(Loc::getMessage('IBLOCK_MODULE_TYPE_NOT_SPECIFIED'));
         }
 
         $arrFilter = [];
@@ -61,21 +61,13 @@ class NewsList extends CBitrixComponent
         } else {
             // иначе получаем все элементы по типу инфоблока
             $arResult['ITEMS'] = $this->getElementsByIBlockType($arParams['IBLOCK_TYPE'], $arrFilter);
-
-            //группируем по id инфоблоков
-            $groupedItems = [];
-            foreach ($arResult['ITEMS'] as $item) {
-                $iblockId = $item['IBLOCK_ID'];
-                if (!array_key_exists($iblockId, $groupedItems)) {
-                    $groupedItems[$iblockId] = [];
-                }
-                $groupedItems[$iblockId][] = $item;
-            }
-            $arResult['ITEMS'] = $groupedItems;
         }
 
-        $this->arResult = $arResult;
+        //группируем по id инфоблоков
+        $groupedItems = $this->groupedItemsbyId($arResult['ITEMS']);
+        $arResult['ITEMS'] = $groupedItems;
 
+        $this->arResult = $arResult;
     }
 
     private function getElementsByIBlockType($iblockType, $arrFilter): array
@@ -111,6 +103,23 @@ class NewsList extends CBitrixComponent
         if (!Loader::includeModule("iblock")) {
             throw new LoaderException(Loc::getMessage("IBLOCK_MODULE_NOT_INSTALLED"));
         }
+    }
+
+    /**
+     * @param $items
+     * @return array
+     */
+    public function groupedItemsbyId($items): array
+    {
+        $groupedItems = [];
+        foreach ($items as $item) {
+            $iblockId = $item['IBLOCK_ID'];
+            if (!array_key_exists($iblockId, $groupedItems)) {
+                $groupedItems[$iblockId] = [];
+            }
+            $groupedItems[$iblockId][] = $item;
+        }
+        return $groupedItems;
     }
 
 }
