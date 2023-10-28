@@ -304,7 +304,7 @@ class CIBlockPropertyCProp
 
         $search = 'name="' . preg_replace("/[^a-zA-Z0-9_:\.]/is", "", $name);
         $replace = 'name="' . "$name";
-        return str_replace($search, $replace, $result, $numbers);
+        return str_replace($search, $replace, $result);
     }
 
     public static function showTextarea($code, $title, $arValue, $strHTMLControlName)
