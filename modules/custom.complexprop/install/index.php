@@ -41,11 +41,10 @@ class custom_complexprop extends CModule
     {
         global $APPLICATION;
         if ($this->isVersionD7()) {
+            $this->InstallFiles();
             $this->InstallDB();
             $this->InstallEvents();
-            $this->InstallFiles();
 
-            ModuleManager::registerModule($this->MODULE_ID);
         } else {
             $APPLICATION->ThrowException(Loc::getMessage('IEX_CPROP_INSTALL_ERROR_VERSION'));
         }
@@ -53,7 +52,6 @@ class custom_complexprop extends CModule
 
     function DoUninstall()
     {
-        ModuleManager::unRegisterModule($this->MODULE_ID);
 
         $this->UnInstallFiles();
         $this->UnInstallEvents();
@@ -63,7 +61,7 @@ class custom_complexprop extends CModule
 
     function InstallDB()
     {
-//        ModuleManager::registerModule('custom.complexprop');
+        ModuleManager::registerModule('custom.complexprop');
 //        EventManager::getInstance()->registerEventHandlerCompatible('main', 'OnUserTypeBuildList',
 //            'custom.complexprop', '\custom.complexprop\lib\CustomComplexProperty', 'GetUserTypeDescription');
         return true;
@@ -72,8 +70,8 @@ class custom_complexprop extends CModule
     function UnInstallDB()
     {
 //        EventManager::getInstance()->unRegisterEventHandler('main', 'OnUserTypeBuildList',
-//            'custom.complexprop', '\custom.complexprop\lib\ComplexPropField', 'GetUserTypeDescription');
-//        ModuleManager::unRegisterModule('custom.complexprop');
+//            'custom.complexprop', '\custom.complexprop\lib\CustomComplexProperty', 'GetUserTypeDescription');
+        ModuleManager::unRegisterModule('custom.complexprop');
         return true;
     }
 
