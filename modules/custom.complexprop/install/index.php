@@ -7,16 +7,16 @@ use Bitrix\Main\ModuleManager;
 
 Loc::loadMessages(__FILE__);
 
-class custom_cprop extends CModule
+class custom_complexprop extends CModule
 {
-    var $MODULE_ID = 'custom.cprop';
+    var $MODULE_ID = 'custom.complexprop';
 
     function __construct()
     {
         $arModuleVersion = array();
         include __DIR__ . '/version.php';
 
-        $this->MODULE_ID = 'custom.cprop';
+        $this->MODULE_ID = 'custom.complexprop';
         $this->MODULE_VERSION = $arModuleVersion['VERSION'];
         $this->MODULE_VERSION_DATE = $arModuleVersion['VERSION_DATE'];
         $this->MODULE_NAME = Loc::getMessage('IEX_CPROP_MODULE_NAME');
@@ -25,7 +25,7 @@ class custom_cprop extends CModule
         $this->PARTNER_NAME = Loc::getMessage('IEX_CPROP_PARTNER_NAME');
         $this->PARTNER_URI = 'https://phpdev.org';
 
-        $this->FILE_PREFIX = 'cprop';
+        $this->FILE_PREFIX = 'complexprop';
         $this->MODULE_FOLDER = str_replace('.', '_', $this->MODULE_ID);
         $this->FOLDER = 'local';
 
@@ -63,11 +63,17 @@ class custom_cprop extends CModule
 
     function InstallDB()
     {
+//        ModuleManager::registerModule('custom.complexprop');
+//        EventManager::getInstance()->registerEventHandlerCompatible('main', 'OnUserTypeBuildList',
+//            'custom.complexprop', '\custom.complexprop\lib\CustomComplexProperty', 'GetUserTypeDescription');
         return true;
     }
 
     function UnInstallDB()
     {
+//        EventManager::getInstance()->unRegisterEventHandler('main', 'OnUserTypeBuildList',
+//            'custom.complexprop', '\custom.complexprop\lib\ComplexPropField', 'GetUserTypeDescription');
+//        ModuleManager::unRegisterModule('custom.complexprop');
         return true;
     }
 
