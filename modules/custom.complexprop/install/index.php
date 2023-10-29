@@ -63,14 +63,14 @@ class custom_complexprop extends CModule
     {
         ModuleManager::registerModule('custom.complexprop');
 //        EventManager::getInstance()->registerEventHandlerCompatible('main', 'OnUserTypeBuildList',
-//            'custom.complexprop', '\custom.complexprop\lib\CustomComplexProperty', 'GetUserTypeDescription');
+//            'custom.complexprop', 'lib\CustomComplexProperty', 'GetUserTypeDescription');
         return true;
     }
 
     function UnInstallDB()
     {
 //        EventManager::getInstance()->unRegisterEventHandler('main', 'OnUserTypeBuildList',
-//            'custom.complexprop', '\custom.complexprop\lib\CustomComplexProperty', 'GetUserTypeDescription');
+//            'custom.complexprop', 'lib\CustomComplexProperty', 'GetUserTypeDescription');
         ModuleManager::unRegisterModule('custom.complexprop');
         return true;
     }
