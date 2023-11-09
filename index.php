@@ -36,6 +36,10 @@ use Arhitector\Yandex\Disk;
             <input type="hidden" name="dir" value="<?= $dir ?>">
             <input class="form-control" type="file" name="file[]" multiple>
         </div>
+        <div class="mb-2 mt-2">
+            <input class="form-check-input" type="checkbox" id="overwrite" name="overwrite" value="">
+            <label class="form-check-label" for="overwrite">Перезаписать, если файл с таким именем уже существует</label>
+        </div>
         <div class="col-auto">
             <input class="btn btn-secondary mb-3" type="submit" name="add_file" value="Загрузить">
         </div>
@@ -89,6 +93,9 @@ use Arhitector\Yandex\Disk;
     if (isset($_POST['add_file'])) {
         $uploadDir = $_POST['dir'];
         $files = $_FILES['file'];
+
+        $overwrite = isset($_POST['overwrite']) ? true : false;
+
         for ($i = 0; $i < count($files['name']); $i++) {
             $tmpName = $files['tmp_name'][$i];
             $name = $files['name'][$i];
@@ -96,6 +103,8 @@ use Arhitector\Yandex\Disk;
             $resource = $disk->getResource($uploadPath);
             if (!$resource->has()) {
                 $resource->upload($tmpName);
+            } else if ($resource->has() && $overwrite) {
+                $resource->upload($tmpName, $overwrite);
             }
         }
     }
