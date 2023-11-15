@@ -1,1 +1,1 @@
-# solutions_to_tasks_for_trainees
+# solving the test_task after the internship
