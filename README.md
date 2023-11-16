@@ -1,4 +1,4 @@
-# solving the test_task after the internship
+# solving the test_task after the end of the internship
 
 ***
 
