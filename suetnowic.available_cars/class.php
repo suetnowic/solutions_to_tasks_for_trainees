@@ -25,48 +25,87 @@ class AvailableCars extends CBitrixComponent
     public function executeComponent(): void
     {
 
-        $request = Context::getCurrent()->getRequest();
-        $startTimeParam = strtotime($request->get('start_time'));
-        $endTimeParam = strtotime($request->get('end_time'));
+        $requestData = $this->handleRequestParam();
+        $element = $this->getCurrentUserPosition();
+        $comfortLevels = $this->getComfortLevelsForPosition($element);
+        $companyCars = $this->getAllCompanyCars();
+        $allCarsPosition = $this->getCarsForCurrentUserPosition($companyCars, $comfortLevels);
+        $trips = $this->getAllTrips();
 
-        $currentUserId = CurrentUser::get()->getId();
+        $tripCarNames = array_keys($trips);
+        $availableCarNames = array_keys($allCarsPosition);
+        $unreservedCars = array_diff($availableCarNames, $tripCarNames);
 
-        $userPosition = CUser::GetList(['ID'], ['ID'], ['ID' => $currentUserId])->Fetch()['WORK_POSITION'];
-        $posRes = CIBlockElement::GetList([], ['IBLOCK_CODE' => 'POSITIONS', 'NAME' => $userPosition], false, false, ['NAME', '*']);
-        $element = $posRes->Fetch();
+        $availableCarsInTime = $this->checkAvailableCarsInTime($trips, $requestData, $unreservedCars, $availableCarNames);
 
-        $propsPosRes = CIBlockElement::GetProperty($element['IBLOCK_ID'], $element['ID'], ['sort' => 'asc'], ['CODE' => 'COMFORT_LEVEL']);
-        $comfortLevels = [];
-        while ($prop = $propsPosRes->GetNext()) {
-            $comfortLevels[] = $prop['VALUE'];
+        $filteredArray = array_intersect_key($companyCars, array_flip($availableCarsInTime));
+
+        $this->formatFilteredArrayToResultArray($filteredArray);
+
+        $this->includeComponentTemplate();
+    }
+
+    private function formatFilteredArrayToResultArray($filteredArray): void
+    {
+        $arResult = [];
+        foreach ($filteredArray as $key => $value) {
+            $arResult[$key] = [
+                'comfort' => $this->getComfortName($value[0]),
+                'driver' => $value[1]
+            ];
+        }
+        $this->arResult = $arResult;
+
+    }
+
+    private function getComfortName($id)
+    {
+        $list = CIBlockElement::GetList([], ['IBLOCK_CODE' => 'COMFORT', 'ID' => $id], false, false, ['ID', 'NAME'])->Fetch();
+        return $list['NAME'];
+    }
+
+    private function checkAvailableCarsInTime($trips, $requestData, $unreservedCars, $availableCarNames): array
+    {
+        $availableCarsInTime = [];
+
+        $matchingTrips = $this->filterTripsByAvailableCars($trips, $availableCarNames);
+
+        foreach ($matchingTrips as $carModel => $value) {
+            $carStartTime = $value['start_time'];
+            $carEndTime = $value['end_time'];
+            $startTimeParam = $requestData['start_time'];
+            $endTimeParam = $requestData['end_time'];
+
+            $carIsAvailable = true;
+
+            if (($startTimeParam >= $carStartTime && $startTimeParam <= $carEndTime) && ($endTimeParam >= $carStartTime && $endTimeParam <= $carEndTime)) {
+                $carIsAvailable = false;
+            }
+            if ($carIsAvailable) {
+                $availableCarsInTime[] = $carModel;
+            }
+        }
+        foreach ($unreservedCars as $carName) {
+            $availableCarsInTime[] = $carName;
         }
 
-        $carsResult = CIBlockElement::GetList([], ['IBLOCK_CODE' => 'COMPANY_CARS'], false, false, ['*']);
-        $companyCars = [];
+        return $availableCarsInTime;
+    }
 
-        while ($element = $carsResult->GetNext()) {
+    private function filterTripsByAvailableCars($trips, $availableCarNames): array
+    {
+        $matchingTrips = [];
 
-            $propsCarRes = CIBlockElement::GetProperty($element['IBLOCK_ID'], $element['ID'], ['SORT' => 'ASC']);
-
-            $tmpCompanyCars = [];
-            while ($props = $propsCarRes->GetNext()) {
-                $tmpCompanyCars[] = $props['VALUE'];
-            }
-            for ($i = 0; $i < count($tmpCompanyCars); $i += 3) {
-                $key = $tmpCompanyCars[$i];
-                $value1 = $tmpCompanyCars[$i + 1];
-                $value2 = $tmpCompanyCars[$i + 2];
-                $companyCars[$key] = array($value1, $value2);
+        foreach ($trips as $carModel => $value) {
+            if (in_array($carModel, $availableCarNames)) {
+                $matchingTrips[$carModel] = $value;
             }
         }
+        return $matchingTrips;
+    }
 
-        $allCarsPosition = [];
-        foreach ($companyCars as $key => $value) {
-            if (in_array($value[0], $comfortLevels)) {
-                $allCarsPosition[$key] = $value;
-            }
-        }
-
+    private function getAllTrips(): array
+    {
         $tripsRes = CIBlockElement::GetList([], ['IBLOCK_CODE' => 'TRIPS'], false, false, ['*']);
         $trips = [];
         while ($element = $tripsRes->GetNext()) {
@@ -85,39 +124,7 @@ class AvailableCars extends CBitrixComponent
                 $trips[$this->getNameById($tmpTrip[$i + 3])] = $tripData;
             }
         }
-
-        $tripCarNames = array_keys($trips);
-        $availableCarNames = array_keys($allCarsPosition);
-
-        $unreservedCars = array_diff($availableCarNames, $tripCarNames);
-
-        $availableCarsInTime = [];
-        foreach ($trips as $carId => $value) {
-            $carStartTime = $value['start_time'];
-            $carEndTime = $value['end_time'];
-
-            $carIsAvailable = true;
-
-            if (($startTimeParam >= $carStartTime && $startTimeParam <= $carEndTime) && ($endTimeParam >= $carStartTime && $endTimeParam <= $carEndTime)) {
-                $carIsAvailable = false;
-            }
-            if ($carIsAvailable) {
-                $availableCarsInTime[] = $carId;
-            }
-        }
-        foreach ($unreservedCars as $carName) {
-            $availableCarsInTime[] = $carName;
-        }
-
-        $filteredArray = array_intersect_key($companyCars, array_flip($availableCarsInTime));
-
-        echo 'Доступные автомобили на запрошенное время: <br>';
-        foreach ($filteredArray as $key => $value) {
-            echo 'Модель: ' . $key . '<br>';
-            echo 'Категория комфорта: ' . $this->getComfortName($value[0]) . '<br>';
-            echo 'Водитель: ' . $value[1] . '<br>';
-        }
-
+        return $trips;
     }
 
     private function getNameById($id)
@@ -127,11 +134,64 @@ class AvailableCars extends CBitrixComponent
         return $propertyResult['VALUE'];
     }
 
-    private function getComfortName($id)
+    private function getCarsForCurrentUserPosition($companyCars, $comfortLevels): array
     {
-        $list = CIBlockElement::GetList([], ['IBLOCK_CODE' => 'COMFORT', 'ID' => $id], false, false, ['ID', 'NAME'])->Fetch();
-        return $list['NAME'];
+        $allCarsPosition = [];
+        foreach ($companyCars as $key => $value) {
+            if (in_array($value[0], $comfortLevels)) {
+                $allCarsPosition[$key] = $value;
+            }
+        }
+        return $allCarsPosition;
     }
 
+    private function getAllCompanyCars(): array
+    {
+        $carsResult = CIBlockElement::GetList([], ['IBLOCK_CODE' => 'COMPANY_CARS'], false, false, ['*']);
+        $companyCars = [];
 
+        while ($element = $carsResult->GetNext()) {
+            $propsCarRes = CIBlockElement::GetProperty($element['IBLOCK_ID'], $element['ID'], ['SORT' => 'ASC']);
+
+            $tmpCompanyCars = [];
+            while ($props = $propsCarRes->GetNext()) {
+                $tmpCompanyCars[] = $props['VALUE'];
+            }
+            for ($i = 0; $i < count($tmpCompanyCars); $i += 3) {
+                $key = $tmpCompanyCars[$i];
+                $value1 = $tmpCompanyCars[$i + 1];
+                $value2 = $tmpCompanyCars[$i + 2];
+                $companyCars[$key] = array($value1, $value2);
+            }
+        }
+        return $companyCars;
+    }
+
+    private function getComfortLevelsForPosition(array $element): array
+    {
+        $propsPosRes = CIBlockElement::GetProperty($element['IBLOCK_ID'], $element['ID'], ['sort' => 'asc'], ['CODE' => 'COMFORT_LEVEL']);
+        $comfortLevels = [];
+        while ($prop = $propsPosRes->GetNext()) {
+            $comfortLevels[] = $prop['VALUE'];
+        }
+        return $comfortLevels;
+    }
+
+    private function getCurrentUserPosition(): array
+    {
+        $currentUserId = CurrentUser::get()->getId();
+        $userPosition = CUser::GetList(['ID'], ['ID'], ['ID' => $currentUserId])->Fetch()['WORK_POSITION'];
+        return CIBlockElement::GetList([], ['IBLOCK_CODE' => 'POSITIONS', 'NAME' => $userPosition], false, false, ['NAME', '*'])->Fetch();
+    }
+
+    private function handleRequestParam(): array
+    {
+        $request = Context::getCurrent()->getRequest();
+        $startTimeParam = strtotime($request->get('start_time'));
+        $endTimeParam = strtotime($request->get('end_time'));
+        return [
+            'start_time' => $startTimeParam,
+            'end_time' => $endTimeParam
+        ];
+    }
 }
